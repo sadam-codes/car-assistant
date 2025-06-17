@@ -37,7 +37,7 @@ const Chatbot = () => {
     }, [messages]);
 
     return (
-        <div className="w-full max-w-md mx-auto border rounded-xl shadow-lg flex flex-col h-[530px] bg-white overflow-hidden">
+        <div className="max-w-sm border rounded-xl flex flex-col h-[530px] bg-white overflow-hidden">
             <div className="bg-black text-white text-lg font-semibold py-3 px-4 text-center">
                 Car Assistant
             </div>
