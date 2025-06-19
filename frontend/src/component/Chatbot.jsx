@@ -37,7 +37,7 @@ const Chatbot = () => {
     }, [messages]);
 
     return (
-        <div className="max-w-sm border rounded-xl flex flex-col h-[530px] bg-white overflow-hidden">
+        <div className="border rounded-xl flex flex-col h-[530px] bg-white overflow-hidden">
             <div className="bg-black text-white text-lg font-semibold py-3 px-4 text-center">
                 Car Assistant
             </div>
@@ -53,7 +53,11 @@ const Chatbot = () => {
                                 ? "bg-black text-white rounded-br-none"
                                 : "bg-white text-gray-900 rounded-bl-none"}`}
                         >
-                            <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                            <div
+                                className="text-sm whitespace-pre-line"
+                                dangerouslySetInnerHTML={{ __html: msg.content }}
+                            ></div>
+
 
                             <div className="text-xs text-gray-300 text-right mt-1">
                                 {msg.time}

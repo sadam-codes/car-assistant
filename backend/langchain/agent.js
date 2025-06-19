@@ -52,7 +52,12 @@ export const chatWithDB = async (question) => {
     const carRows = await datasource.query("SELECT * FROM cars");
 
     const carData = carRows.length
-        ? carRows.map((c, i) => `${i + 1}. ${c.name} (${c.color}, ${c.model}) - $${c.price}`).join("\n")
+        ? carRows.map((c, i) => {
+            const line = `${i + 1}. ${c.name} (${c.color}, ${c.model}) - $${c.price}`;
+            return c.image
+                ? `${line}<br/><img src="http://localhost:4000${c.image}" alt="${c.name}" style="max-width: 100%; border-radius: 8px;" />`
+                : line;
+        }).join("\n")
         : "No cars available.";
 
     const response = await chain.invoke({
