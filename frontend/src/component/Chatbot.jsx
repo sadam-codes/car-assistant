@@ -8,11 +8,11 @@ const Chatbot = () => {
         {
             sender: "bot",
             content: marked("Hello.. I'm listening! Go on.."),
+            rawContent: "",
             time: new Date().toLocaleTimeString(),
         },
     ]);
     const chatRef = useRef(null);
-
     const sendMessage = async () => {
         if (!message.trim()) return;
 
@@ -21,50 +21,41 @@ const Chatbot = () => {
             content: marked.parse(message),
             time: new Date().toLocaleTimeString(),
         };
-
         setMessages((prev) => [...prev, userMessage]);
         setMessage("");
 
         const botMessage = {
             sender: "bot",
             content: "",
-            rawContent: "",
             time: new Date().toLocaleTimeString(),
         };
         setMessages((prev) => [...prev, botMessage]);
-
         try {
             const res = await fetch("http://localhost:4000/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message }),
             });
-
             const reader = res.body.getReader();
             const decoder = new TextDecoder("utf-8");
-
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
-
-                const chunk = decoder.decode(value);
-
+                const chunk = decoder.decode(value, { stream: true });
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
-                    last.content = marked.parse((last.rawContent || "") + chunk);
-                    last.rawContent = (last.rawContent || "") + chunk;
+                    const raw = (last.rawContent || "") + chunk;
 
+                    last.rawContent = raw;
+                    last.content = marked.parse(raw);
                     return updated;
                 });
             }
-
         } catch (err) {
             console.error("Streaming error", err);
         }
     };
-
-
     const formatTime = (timeStr) => {
         if (!timeStr) return "";
         const [hourStr, minuteStr] = timeStr.split(":");
@@ -91,7 +82,6 @@ const Chatbot = () => {
                         {msg.sender === "bot" && (
                             <img src="/images/chatbot.jpeg" alt="Bot Avatar" className="w-7 h-7 rounded-full" />
                         )}
-
                         <div>
                             <div className={`
                                 px-4 py-2 rounded-[20px] max-w-xs text-sm 

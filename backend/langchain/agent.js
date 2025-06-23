@@ -10,7 +10,7 @@ dotenv.config();
 const llm = new ChatGroq({
     apiKey: process.env.GROQ_API_KEY,
     model: "llama3-70b-8192",
-    streaming:true,
+    streaming: true,
 });
 
 const datasource = new DataSource({
@@ -56,11 +56,11 @@ export const chatWithDBStream = async (question, res) => {
 
     const carData = carRows.length
         ? carRows.map((c, i) => {
-              const line = `${i + 1}. ${c.name} (${c.color}, ${c.model}) - $${c.price}`;
-              return c.image
-                  ? `${line}<br/><img src="http://localhost:4000${c.image}" alt="${c.name}" style="max-width: 100%; border-radius: 8px;" />`
-                  : line;
-          }).join("\n")
+            const line = `${i + 1}. ${c.name} (${c.color}, ${c.model}) - $${c.price}`;
+            return c.image
+                ? `${line}<br/><img src="http://localhost:4000${c.image}" alt="${c.name}" style="max-width: 100%; border-radius: 8px;" />`
+                : line;
+        }).join("\n")
         : "No cars available.";
 
     const stream = await chain.stream({
@@ -68,9 +68,26 @@ export const chatWithDBStream = async (question, res) => {
         car_data: carData,
         car_count: carRows.length,
     });
-    for await (const chunk of stream) {
-        res.write(chunk); 
-    }
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Transfer-Encoding", "chunked");
 
-    res.end();
+    let buffer = "";
+    try {
+        for await (const chunk of stream) {
+            buffer += chunk;
+            const words = buffer.split(" ");
+            buffer = words.pop();
+            for (const word of words) {
+                res.write(word + " ");
+                await new Promise((r) => setTimeout(r, 30));
+            }
+        }
+        if (buffer) {
+            res.write(buffer);
+        }
+        res.end();
+    } catch (err) {
+        console.error("Streaming Error:", err);
+        res.status(500).end("Streaming failed");
+    }
 };

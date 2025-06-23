@@ -17,16 +17,7 @@ const Home = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl">
-                    <Link
-                        to="/chatbot"
-                        className="bg-gray-800 hover:bg-gray-700 transition-all rounded-xl shadow-lg p-6 flex flex-col items-center text-center"
-                    >
-                        <FaRobot className="text-4xl text-yellow-400 mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">Chat with Bot</h3>
-                        <p className="text-gray-400">
-                            Get answers, recommendations, and support through our AI chatbot.
-                        </p>
-                    </Link>
+
                     <Link
                         to="/add-car"
                         className="bg-gray-800 hover:bg-gray-700 transition-all rounded-xl shadow-lg p-6 flex flex-col items-center text-center"
@@ -35,6 +26,16 @@ const Home = () => {
                         <h3 className="text-xl font-semibold mb-2">Add Your Car</h3>
                         <p className="text-gray-400">
                             Post your car for sale and let others explore your listing.
+                        </p>
+                    </Link>
+                    <Link
+                        to="/chatbot"
+                        className="bg-gray-800 hover:bg-gray-700 transition-all rounded-xl shadow-lg p-6 flex flex-col items-center text-center"
+                    >
+                        <FaRobot className="text-4xl text-yellow-400 mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">Chat with Bot</h3>
+                        <p className="text-gray-400">
+                            Get answers, recommendations, and support through our AI chatbot.
                         </p>
                     </Link>
                 </div>
