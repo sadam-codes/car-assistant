@@ -10,6 +10,7 @@ dotenv.config();
 const llm = new ChatGroq({
     apiKey: process.env.GROQ_API_KEY,
     model: "llama3-70b-8192",
+    streaming:true,
 });
 
 const datasource = new DataSource({
@@ -50,23 +51,26 @@ const chain = RunnableSequence.from([
     new StringOutputParser(),
 ]);
 
-export const chatWithDB = async (question) => {
+export const chatWithDBStream = async (question, res) => {
     const carRows = await datasource.query("SELECT * FROM cars");
 
     const carData = carRows.length
         ? carRows.map((c, i) => {
-            const line = `${i + 1}. ${c.name} (${c.color}, ${c.model}) - $${c.price}`;
-            return c.image
-                ? `${line}<br/><img src="http://localhost:4000${c.image}" alt="${c.name}" style="max-width: 100%; border-radius: 8px;" />`
-                : line;
-        }).join("\n")
+              const line = `${i + 1}. ${c.name} (${c.color}, ${c.model}) - $${c.price}`;
+              return c.image
+                  ? `${line}<br/><img src="http://localhost:4000${c.image}" alt="${c.name}" style="max-width: 100%; border-radius: 8px;" />`
+                  : line;
+          }).join("\n")
         : "No cars available.";
 
-    const response = await chain.invoke({
+    const stream = await chain.stream({
         input: question,
         car_data: carData,
         car_count: carRows.length,
     });
+    for await (const chunk of stream) {
+        res.write(chunk); 
+    }
 
-    return response;
+    res.end();
 };

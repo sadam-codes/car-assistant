@@ -1,12 +1,11 @@
-import { chatWithDB } from "../langchain/agent.js";
+import { chatWithDBStream } from "../langchain/agent.js";
 
 export const handleChat = async (req, res) => {
     const { message } = req.body;
     try {
-        const response = await chatWithDB(message);
-        res.json({ response });
+        await chatWithDBStream(message, res);
     } catch (error) {
-        console.error("Chat Error:", error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Streaming Error:", error);
+        res.status(500).end("Internal Server Error");
     }
 };

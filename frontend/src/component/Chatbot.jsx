@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { IoSendOutline } from "react-icons/io5";
-import axios from "axios";
 import { marked } from "marked";
 
 const Chatbot = () => {
@@ -26,18 +25,45 @@ const Chatbot = () => {
         setMessages((prev) => [...prev, userMessage]);
         setMessage("");
 
+        const botMessage = {
+            sender: "bot",
+            content: "",
+            rawContent: "",
+            time: new Date().toLocaleTimeString(),
+        };
+        setMessages((prev) => [...prev, botMessage]);
+
         try {
-            const res = await axios.post("http://localhost:4000/api/chat", { message });
-            const botMessage = {
-                sender: "bot",
-                content: marked.parse(res.data.response),
-                time: new Date().toLocaleTimeString(),
-            };
-            setMessages((prev) => [...prev, botMessage]);
+            const res = await fetch("http://localhost:4000/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message }),
+            });
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    const last = updated[updated.length - 1];
+                    last.content = marked.parse((last.rawContent || "") + chunk);
+                    last.rawContent = (last.rawContent || "") + chunk;
+
+                    return updated;
+                });
+            }
+
         } catch (err) {
-            console.error("Chat error", err);
+            console.error("Streaming error", err);
         }
     };
+
 
     const formatTime = (timeStr) => {
         if (!timeStr) return "";

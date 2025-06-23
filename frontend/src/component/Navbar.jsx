@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
-import { FaCarSide,  FaRobot } from "react-icons/fa";
+import { FaCarSide, FaRobot } from "react-icons/fa";
 import { IoCarSport } from "react-icons/io5";
 
 
